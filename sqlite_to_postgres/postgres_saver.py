@@ -1,7 +1,7 @@
 from typing import Generator
 from dataclasses_movies import *
 from psycopg2.extensions import connection as _connection
-from sqlite_extractor import TABLES
+from db_extractor import TABLES
 
 
 class PostgresSaver:

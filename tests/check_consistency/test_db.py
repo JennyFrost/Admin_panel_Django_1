@@ -6,8 +6,7 @@ from psycopg2.extras import DictCursor
 from psycopg2.extensions import connection as _connection
 from dotenv import load_dotenv
 
-from sqlite_to_postgres.sqlite_extractor import SQLiteExtractor
-from postgres_extractor import PostgresExtractor
+from sqlite_to_postgres.db_extractor import DBExtractor
 
 TABLES = ['film_work', 'genre', 'person', 'genre_film_work', 'person_film_work']
 
@@ -27,8 +26,8 @@ def compare_counts(sqlite_conn: sqlite3.Connection, pg_conn: _connection):
 
 
 def compare_rows(sqlite_conn: sqlite3.Connection, pg_conn: _connection):
-    sqlite_extractor = SQLiteExtractor(sqlite_conn)
-    postgres_extractor = PostgresExtractor(pg_conn)
+    sqlite_extractor = DBExtractor(sqlite_conn)
+    postgres_extractor = DBExtractor(pg_conn)
     tables_sqlite = sqlite_extractor.extract_movies()
     tables_postgres = postgres_extractor.extract_movies()
     for table_sqlite, table_postgres in zip(tables_sqlite, tables_postgres):

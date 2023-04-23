@@ -6,13 +6,13 @@ import psycopg2
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
 
-from sqlite_extractor import SQLiteExtractor
+from db_extractor import DBExtractor
 from postgres_saver import PostgresSaver
 
 
 def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
     postgres_saver = PostgresSaver(pg_conn, 10)
-    sqlite_extractor = SQLiteExtractor(connection)
+    sqlite_extractor = DBExtractor(connection)
 
     data_by_tables = sqlite_extractor.extract_movies()
     postgres_saver.save_all_data(data_by_tables)

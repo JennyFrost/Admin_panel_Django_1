@@ -11,7 +11,7 @@ from postgres_saver import PostgresSaver
 
 
 def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
-    postgres_saver = PostgresSaver(pg_conn, 10)
+    postgres_saver = PostgresSaver(pg_conn, rows_to_insert=10)
     sqlite_extractor = DBExtractor(connection)
 
     data_by_tables = sqlite_extractor.extract_movies()

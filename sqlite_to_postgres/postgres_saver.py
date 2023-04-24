@@ -6,10 +6,10 @@ from db_extractor import TABLES
 
 class PostgresSaver:
 
-    def __init__(self, pg_conn: _connection, n: int):
+    def __init__(self, pg_conn: _connection, rows_to_insert: int):
         self.conn = pg_conn
         self.cursor = pg_conn.cursor()
-        self.n = n
+        self.rows_to_insert = rows_to_insert
         self.start = 0
 
     @staticmethod
@@ -44,12 +44,15 @@ class PostgresSaver:
             for j, row_dict in enumerate(table):
                 row_count = row_dict['count']
                 row_dict.pop('count', None)
+                # переводим словари записей в объекты дата-классов
                 obj = self.make_object(row_dict, TABLES[i])
+                # берем аттрибуты объектов
                 attrs = [attr for attr in obj.__dict__ if obj.__dict__[attr]
                          is not None]
+                # формируем строчку в БД из значений аттрибутов объектов дата-классов
                 row = tuple([getattr(obj, attr) for attr in attrs])
                 data_to_load.append(row)
-                if j > 0 and (j % self.n == 0 or j == row_count - 1):
+                if j > 0 and (j % self.rows_to_insert == 0 or j == row_count - 1):
                     str_for_sql = '(' + ('%s, ' * len(row)).strip(', ') + ')'
                     args = ','.join(self.cursor.mogrify(str_for_sql, elem).decode()
                                     for elem in data_to_load)
@@ -60,5 +63,5 @@ class PostgresSaver:
                                         ON CONFLICT (id) DO NOTHING
                                         """)
                     self.conn.commit()
-                    self.start += self.n
+                    self.start += self.rows_to_insert
                     data_to_load = []

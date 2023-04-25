@@ -45,17 +45,25 @@ if __name__ == '__main__':
     load_dotenv()
 
     @contextmanager
-    def conn_context(db_path: str):
+    def sqlite_conn_context(db_path: str):
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
         yield conn
         conn.close()
 
-    dsl = {'dbname': 'movies_database', 'user': 'app', 'password': '1234',
-           'host': '127.0.0.1', 'port': 5432}
+    @contextmanager
+    def pg_conn_context(dsl: dict):
+        conn = psycopg2.connect(**dsl, cursor_factory=DictCursor)
+        yield conn
+        conn.close()
+
+    dsl = {'dbname': os.environ.get('DB_NAME'),
+           'user': os.environ.get('DB_USER'),
+           'password': os.environ.get('DB_PASSWORD'),
+           'host': os.environ.get('DB_HOST'),
+           'port': os.environ.get('DB_PORT')}
     db_path = os.environ.get('DB_PATH')
-    with conn_context(db_path) as sqlite_conn, \
-            psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
+    with sqlite_conn_context(db_path) as sqlite_conn, pg_conn_context(dsl) as pg_conn:
         compare_counts(sqlite_conn, pg_conn)
         compare_rows(sqlite_conn, pg_conn)
 

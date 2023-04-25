@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS content.genre (
 
 CREATE TABLE IF NOT EXISTS content.person (
     id uuid NOT NULL,
-    full_name TEXT NOT NULL UNIQUE,
+    full_name TEXT NOT NULL,
     created timestamp with time zone,
     modified timestamp with time zone,
 );
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS content.genre_film_work (
     created timestamp with time zone,
 );
 
-CREATE UNIQUE INDEX film_work_genre_idx ON content.person_film_work
+CREATE UNIQUE INDEX film_work_genre_idx ON content.genre_film_work
 (film_work_id, genre_id);
 
 CREATE TABLE IF NOT EXISTS content.person_film_work (
@@ -54,5 +54,5 @@ CREATE TABLE IF NOT EXISTS content.person_film_work (
     created timestamp with time zone,
 );
 
-CREATE UNIQUE INDEX film_work_person_idx ON content.person_film_work
-(film_work_id, person_id);
+CREATE UNIQUE INDEX film_work_person_role_idx ON content.person_film_work
+(film_work_id, person_id, role);

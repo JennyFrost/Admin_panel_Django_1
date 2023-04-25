@@ -44,12 +44,9 @@ class PostgresSaver:
             for j, row_dict in enumerate(table):
                 row_count = row_dict['count']
                 row_dict.pop('count', None)
-                # переводим словари записей в объекты дата-классов
                 obj = self.make_object(row_dict, TABLES[i])
-                # берем аттрибуты объектов
                 attrs = [attr for attr in obj.__dict__ if obj.__dict__[attr]
                          is not None]
-                # формируем строчку в БД из значений аттрибутов объектов дата-классов
                 row = tuple([getattr(obj, attr) for attr in attrs])
                 data_to_load.append(row)
                 if j > 0 and (j % self.rows_to_insert == 0 or j == row_count - 1):
@@ -65,3 +62,5 @@ class PostgresSaver:
                     self.conn.commit()
                     self.start += self.rows_to_insert
                     data_to_load = []
+
+        self.cursor.close()

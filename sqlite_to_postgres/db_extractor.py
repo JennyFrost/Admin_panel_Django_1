@@ -3,7 +3,7 @@ import sqlite3
 import psycopg2
 from psycopg2.extensions import connection as _connection
 
-TABLES = ['film_work', 'genre', 'person', 'genre_film_work', 'person_film_work']
+TABLES = ('film_work', 'genre', 'person', 'genre_film_work', 'person_film_work')
 
 
 class DBExtractor:
@@ -28,3 +28,6 @@ class DBExtractor:
                         '''.format(table)
             self.cursor.execute(query)
             yield self.data_generator()
+
+        self.cursor.close()
+

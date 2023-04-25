@@ -29,6 +29,7 @@ class Genre(TimeStampedMixin, UUIDMixin):
         db_table = "content\".\"genre"
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+        models.UniqueConstraint(fields=['name'], name='unique_genre_name')
 
     def __str__(self):
         return self.name
@@ -45,7 +46,7 @@ class Filmwork(TimeStampedMixin, UUIDMixin):
     rating = models.FloatField(_('rating'), blank=True,
                                validators=[MinValueValidator(0),
                                            MaxValueValidator(100)])
-    type = models.TextField(_('type'), choices=Type.choices, null=True)
+    type = models.CharField(_('type'), choices=Type.choices, max_length=255)
     genres = models.ManyToManyField(Genre, through='GenreFilmwork',
                                     verbose_name=_('genres'))
     persons = models.ManyToManyField('Person', through='PersonFilmwork',
@@ -55,6 +56,9 @@ class Filmwork(TimeStampedMixin, UUIDMixin):
         db_table = "content\".\"film_work"
         verbose_name = 'Фильм'
         verbose_name_plural = 'Фильмы'
+        indexes = [
+            models.Index(fields=['rating'], name='film_work_rating_idx'),
+        ]
 
     def __str__(self):
         return self.title
@@ -71,6 +75,10 @@ class GenreFilmwork(UUIDMixin):
         db_table = "content\".\"genre_film_work"
         verbose_name = 'Жанр фильма'
         verbose_name_plural = 'Жанры фильма'
+        indexes = [
+            models.Index(fields=['film_work', 'genre'], name='film_work_genre_idx'),
+        ]
+        models.UniqueConstraint(fields=['film_work', 'genre'], name='unique_filmwork_genre')
 
 
 class Person(TimeStampedMixin, UUIDMixin):
@@ -88,13 +96,24 @@ class Person(TimeStampedMixin, UUIDMixin):
 
 
 class PersonFilmwork(UUIDMixin):
+    class RoleType(models.TextChoices):
+        ACTOR = 'ACT', 'Actor'
+        DIRECTOR = 'DIR', 'Director'
+        WRITER = 'WRI', 'Writer'
+
     person = models.ForeignKey(Person, on_delete=models.CASCADE, verbose_name=_('person'))
     film_work = models.ForeignKey(Filmwork, on_delete=models.CASCADE,
                                   verbose_name=_('filmwork'))
-    role = models.CharField(_('role'), max_length=255)
+    role = models.CharField(_('role'), choices=RoleType.choices, max_length=255)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "content\".\"person_film_work"
         verbose_name = "Персона в фильме"
         verbose_name_plural = "Персоны в фильме"
+        indexes = [
+            models.Index(fields=['person', 'film_work', 'role'],
+                         name='film_work_person_role_idx'),
+        ]
+        models.UniqueConstraint(fields=['person', 'film_work', 'role'],
+                                name='unique_person_filmwork_role')
